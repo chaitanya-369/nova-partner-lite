@@ -51,6 +51,12 @@ export default function App() {
   const { items: briefingItems, loading: briefingLoading, loadingStep, loadingProgress } = useBriefing(storeId);
 
   // ── Auth handler ─────────────────────────────────────────────────────────
+  /**
+   * Authenticates the user (store owner) with a PIN code.
+   * On success, sets the store ID and transitions to the loading screen.
+   * 
+   * @param {string} code - The 4-digit PIN code entered by the user.
+   */
   const handleAuth = useCallback((code) => {
     setStoreId(code);
     setScreen(SCREENS.LOADING);
@@ -70,6 +76,14 @@ export default function App() {
   // This avoids the anti-pattern of calling setReviewItems inside setActions.
   const actionsRef = React.useRef([]);
 
+  /**
+   * Handles a swipe action on an inventory item card.
+   * Records the decision and removes the item from the review stack.
+   * When the stack is empty, it triggers the batch sync.
+   * 
+   * @param {number|string} id - The unique ID of the inventory item.
+   * @param {'in-stock'|'out-of-stock'} action - The swipe direction/action.
+   */
   const handleSwipe = useCallback((id, action) => {
     const swipedItem = reviewItems.find((i) => i.id === id);
     if (!swipedItem) return;
@@ -98,6 +112,12 @@ export default function App() {
   }, [reviewItems, storeId]);
 
   // ── Batch sync ───────────────────────────────────────────────────────────
+  /**
+   * Synchronizes the accumulated swipe actions with the backend API.
+   * Transitions to the syncing screen, performs the API call, and handles results.
+   * 
+   * @param {Array<{id: number|string, sku: string, status: string, storeId: string}>} finalActions - The batch of updates.
+   */
   const handleSync = useCallback(async (finalActions) => {
     setScreen(SCREENS.SYNCING);
     try {
@@ -113,6 +133,10 @@ export default function App() {
   }, []);
 
   // ── Reset (demo mode) ────────────────────────────────────────────────────
+  /**
+   * Resets the application state to allow running the demo again.
+   * Clears all actions, items, and authentication state.
+   */
   const handleReset = useCallback(() => {
     actionsRef.current = [];
     setActions([]);
